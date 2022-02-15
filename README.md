@@ -27,14 +27,14 @@ chmod +x run.sh && ./run.sh
     ```shell
         apt update
         apt install screen
-        screen -S cfScaner
+        screen -S cfscaner
         chmod +x run.sh && ./run.sh
     ```
 
     *   使用以下命令来返回会话:
 
     ```shell
-    screen -r cfScaner
+    screen -r cfscaner
     ```
 
 4.  请根据服务器配置自行更改并发数和带宽,建议最多占用50%左右;
