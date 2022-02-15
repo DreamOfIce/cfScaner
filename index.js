@@ -5,10 +5,11 @@ const path = require('path');
 const axios = require('axios');
 const https = require('https');
 
-var waitList;
-var concurrent;
+var waitList = [];
+var concurrent = 0;
+var errors = 0;
 var sum;
-var cloudFrontIPs;
+var cloudFrontIPs = [];
 
 const newRequest = async(ip) => {
     try {
@@ -20,6 +21,8 @@ const newRequest = async(ip) => {
             cloudFrontIPs.push(ip);
         }
     } catch (err) {
+        --concurrent;
+        ++errors;
         console.log(`ERROR:请求${ip}失败:${err}`);
     }
 }
@@ -43,10 +46,8 @@ const writeResult = () => {
 
 //axios配置
 axios.defaults.headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.82 Safari/537.36' };
-axios.defaults.timeout = 10000;
-axios.defaults.validateStatus = (status) => {
-    return true;
-}
+axios.defaults.timeout = 5000;
+axios.defaults.validateStatus = () => true
 axios.defaults.httpsAgent = new https.Agent({
     rejectUnauthorized: false
 })
@@ -75,7 +76,7 @@ fs.readFile(path.join(__dirname, inputFile), { encoding: 'utf8' }).then(string =
     waitList = string.split('\n');
     sum = waitList.length;
     console.log("开始扫描HTTPS服务器");
-    console.log(`最大并发:${maxConcurrency},输出文件:${outputFile}`);
+    console.log(`最大并发:${maxConcurrency},输出文件:${outputFile}\n`);
     for (let i = 0; i < maxConcurrency; i++) {
         newRequest(waitList[i]);
         waitList.shift;
@@ -84,5 +85,6 @@ fs.readFile(path.join(__dirname, inputFile), { encoding: 'utf8' }).then(string =
 
 //定期输出进度
 const interval = setInterval(() => {
-    console.log(`%c已完成${Math.round((sum - waitList.length) / sum)}%,共发现${cloudFrontIPs}个CloudFront节点`, 'color: blue');
+    let requestd = sum - waitList.length;
+    console.log(`共发送${requestd}个请求,占总数的(${Math.round((requestd) / sum * 100) / 100}%,其中${errors}个请求失败,${concurrent}个请求正在进行;\n共发现${cloudFrontIPs.length}个CloudFront节点,`);
 }, 10000);
