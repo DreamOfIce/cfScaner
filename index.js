@@ -84,7 +84,7 @@ fs.readFile(path.join(__dirname, inputFile), { encoding: 'utf8' }).then(async st
     console.log("初始化日志文件句柄");
     logHandle = await fs.open(path.join(__dirname, logFile), 'w');
     console.log("完成");
-    console.log("开始扫描HTTPS服务器");
+    console.log(`开始扫描${sum}个HTTPS服务器`);
     //开始请求
     for (let i = 0; i < maxConcurrency && i < sum; i++) {
         newRequest(waitList.shift());
@@ -94,5 +94,5 @@ fs.readFile(path.join(__dirname, inputFile), { encoding: 'utf8' }).then(async st
 //定期输出进度
 const interval = setInterval(() => {
     let requestd = sum - waitList.length;
-    console.log(`共发送${requestd}个请求,占总数的${Math.round(requestd / sum) * 100}%,其中${errors}个请求失败,${concurrent}个请求正在进行;\n共发现${cloudFrontIPSum}个CloudFront节点.`);
+    console.log(`共发送${requestd}个请求,占总数的${Math.round(requestd / sum * 100)}%,其中${errors}个请求失败,${concurrent}个请求正在进行;\n已发现${cloudFrontIPSum}个CloudFront节点.`);
 }, 10000);
