@@ -130,6 +130,4 @@ dist
 .pnp.*
 
 #Custom
-china_ip.txt
-ip_webserver.txt
-output.txt
+*.txt
